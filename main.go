@@ -152,6 +152,6 @@ var pushTemplate = ttmpl.Must(ttmpl.New("pushmsg").Funcs(ttmpl.FuncMap{"trim": a
 
 const pushTemplateText = `
 {{ .Pusher.Name }} pushed {{ if .TmplParams.CommitCount }}{{ .TmplParams.CommitCount }} commits{{ end }} to {{ .Repository.Owner.Name }}/{{ .Repository.Name }} 
-{{ range .Commits }}   {{if .Author.Username}}{{.Author.Username}}{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ trim .Message 40 }}
+{{ range .Commits }}   {{if .Author.Username}}{{.Author.Username}}{{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ trim .Message 40 }}
 {{ end }}
 `
