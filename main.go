@@ -102,7 +102,6 @@ const rootTemplateHTML = `
   <style type="text/css">
 
     @import url(//fonts.googleapis.com/css?family=Droid+Serif);
-    @import url(//fonts.googleapis.com/css?family=Droid+Sans+Mono);
 
     body {
        background : lightgrey ;
