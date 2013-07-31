@@ -134,6 +134,9 @@ It will forward the notification through <a href="http://pushbullet.com">PushBul
         <li>Click Update Settings
         </ul>
 
+
+        Bugs and patches: <a href="http://github.com/dgryski/ghpbhook">github.com/dgryski/ghpbhook</a>.
+
     </div>
   </body>
 </html>
