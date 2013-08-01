@@ -30,10 +30,6 @@ type pushPayload struct {
 		Id      string
 		Message string
 	}
-
-	TmplParams struct {
-		CommitCount int
-	}
 }
 
 func main() {
@@ -70,8 +66,6 @@ func main() {
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		}
-
-		payload.TmplParams.CommitCount = len(payload.Commits)
 
 		var o bytes.Buffer
 		err = pushTemplate.Execute(&o, payload)
@@ -179,18 +173,26 @@ It will forward the notification through <a href="http://pushbullet.com">PushBul
 </html>
 `
 
-func atMost(s string, n int) string {
+func trim(s string, n int) string {
 	l := len(s)
 	if l > n {
 		l = n
 	}
 	return s[:l]
 }
+func ellipsize(s string, n int) string {
+	l := len(s)
+	if l > n {
+		l = n
+		return s[:n-5] + "(...)"
+	}
+	return s
+}
 
-var pushTemplate = ttmpl.Must(ttmpl.New("pushmsg").Funcs(ttmpl.FuncMap{"trim": atMost}).Parse(pushTemplateText))
+var pushTemplate = ttmpl.Must(ttmpl.New("pushmsg").Funcs(ttmpl.FuncMap{"trim": trim, "ellipsize": ellipsize}).Parse(pushTemplateText))
 
 const pushTemplateText = `
-{{ .Pusher.Name }} pushed {{ if .TmplParams.CommitCount }}{{ .TmplParams.CommitCount }} commits{{ end }} to {{ .Repository.Owner.Name }}/{{ .Repository.Name }} 
-{{ range .Commits }}   {{if .Author.Username}}{{.Author.Username}}{{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ trim .Message 40 }}
+{{ .Pusher.Name }} pushed {{ if len .Commits }}{{ len .Commits}} commits{{ end }} to {{ .Repository.Owner.Name }}/{{ .Repository.Name }}
+{{ range .Commits }}  {{if .Author.Username}}{{.Author.Username}}{{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ ellipsize .Message 60 }}
 {{ end }}
 `
