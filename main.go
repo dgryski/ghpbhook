@@ -12,7 +12,7 @@ import (
 	ttmpl "text/template"
 )
 
-type Payload struct {
+type pushPayload struct {
 	Repository struct {
 		Name  string
 		Owner struct {
@@ -64,7 +64,7 @@ func main() {
 			return
 		}
 
-		var payload Payload
+		var payload pushPayload
 		err = json.Unmarshal([]byte(payloadJSON), &payload)
 		if err != nil {
 			http.Error(w, "", http.StatusBadRequest)
