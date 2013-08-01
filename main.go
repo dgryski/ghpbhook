@@ -98,7 +98,7 @@ var rootTemplate = htmpl.Must(htmpl.New("root").Parse(rootTemplateHTML))
 const rootTemplateHTML = `
 <html>
   <head>
-  <title>ghpbhoook</title>
+  <title>ghpbhook</title>
   <style type="text/css">
 
     @import url(//fonts.googleapis.com/css?family=Droid+Serif);
