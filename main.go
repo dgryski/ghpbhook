@@ -52,16 +52,33 @@ func main() {
 			return
 		}
 
-		r.ParseForm()
+		err := r.ParseForm()
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+
 		payloadJSON := r.PostFormValue("payload")
+		if payloadJSON == "" {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		var payload Payload
-		json.Unmarshal([]byte(payloadJSON), &payload)
+		err = json.Unmarshal([]byte(payloadJSON), &payload)
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
 
 		payload.TmplParams.CommitCount = len(payload.Commits)
 
 		var o bytes.Buffer
-		pushTemplate.Execute(&o, payload)
+		err = pushTemplate.Execute(&o, payload)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
 
 		pb := pushbullet.New(apikey)
 		devices, err := pb.Devices()
@@ -70,7 +87,16 @@ func main() {
 			return
 		}
 
-		pb.PushNote(devices[0].Id, "GitHub", o.String())
+		if len(devices) == 0 {
+			// nothing to do, but do it successfully
+			return
+		}
+
+		err = pb.PushNote(devices[0].Id, "GitHub", o.String())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusServiceUnavailable)
+			return
+		}
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
