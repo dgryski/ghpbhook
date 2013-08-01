@@ -24,8 +24,8 @@ type Payload struct {
 	}
 	Commits []struct {
 		Author struct {
-                        Username string
-			Name string
+			Username string
+			Name     string
 		}
 		Id      string
 		Message string
