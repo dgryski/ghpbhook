@@ -79,6 +79,7 @@ func main() {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
+		notification := o.String()
 
 		pb := pushbullet.New(apikey)
 		devices, err := pb.Devices()
@@ -92,11 +93,21 @@ func main() {
 			return
 		}
 
-		err = pb.PushNote(devices[0].Id, "GitHub", o.String())
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
+		success := 0
+		for _, device := range devices {
+			// TODO(dgryski): spawn these in parallel?
+			err = pb.PushNote(device.Id, "GitHub", notification)
+			if err == nil {
+				success++
+			}
 		}
+
+		if success == 0 {
+			// no notifications succeeded :(
+			http.Error(w, "Error sending notification", http.StatusServiceUnavailable)
+		}
+
+		return
 	})
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
