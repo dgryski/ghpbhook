@@ -32,7 +32,7 @@ type Payload struct {
 	}
 
 	TmplParams struct {
-		CommitCount int //
+		CommitCount int
 	}
 }
 
