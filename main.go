@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	ttmpl "text/template"
 )
@@ -37,15 +38,27 @@ func main() {
 	http.HandleFunc("/pb/", func(w http.ResponseWriter, r *http.Request) {
 		path := strings.Split(r.URL.Path, "/")
 
-		if len(path) != 3 {
+		if len(path) != 3 && len(path) != 4 {
 			http.NotFound(w, r)
 			return
 		}
+
+		hasDeviceId := len(path) == 4
 
 		apikey := path[2]
 		if len(apikey) != 32 {
 			http.Error(w, "", http.StatusBadRequest)
 			return
+		}
+
+		var deviceId int
+		if hasDeviceId {
+			var err error
+			deviceId, err = strconv.Atoi(path[3])
+			if err != nil {
+				http.Error(w, "", http.StatusBadRequest)
+				return
+			}
 		}
 
 		err := r.ParseForm()
@@ -88,12 +101,22 @@ func main() {
 		}
 
 		success := 0
+		tries := 0
 		for _, device := range devices {
 			// TODO(dgryski): spawn these in parallel?
-			err = pb.PushNote(device.Id, "GitHub", notification)
-			if err == nil {
-				success++
+			if !hasDeviceId || deviceId == device.Id {
+				err = pb.PushNote(device.Id, "GitHub", notification)
+				tries++
+				if err == nil {
+					success++
+				}
 			}
+		}
+
+		// user sent a device id but there was no match for the devices associated with the key
+		if hasDeviceId && tries == 0 {
+			http.NotFound(w, r)
+			return
 		}
 
 		if success == 0 {
