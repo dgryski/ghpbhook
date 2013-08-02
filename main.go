@@ -166,7 +166,7 @@ const rootTemplateHTML = `
     div#content
     {
        margin : auto ;
-       width : 75%;
+       width : 90%;
     }
 
 </style>
@@ -177,19 +177,29 @@ const rootTemplateHTML = `
 
 This is a webhook for <a href="https://help.github.com/articles/post-receive-hooks">GitHub's post-receive</a> notifications.
 It will forward the notification through <a href="http://pushbullet.com">PushBullet</a> to your Android device.
+<pre>
+Garen Torikian pushed 3 commits to octokitty/testing
+    octokitty c441029 - Test
+    octokitty 36c5f22 - This is me testing the windows client.
+    octokitty 1481a2d - Rename madame-bovary.txt to words/madame-bovary.txt
+</pre>
 
-        <p> Steps:
+        <p> Setup:
 
         <ul>
-        <li> Open your repository on GitHub and go to its Admin page
+        <li>Install the <a href="https://play.google.com/store/apps/details?id=com.pushbullet.android">PushBullet app</a> on your phone
+        <li>Go to the <a href="https://www.pushbullet.com/settings">PushBullet settings page</a> and copy your API key.
+        <li>Next, open your repository on GitHub and go to its Admin page
         <li>Click Service Hooks
         <li>Click WebHook URLs
-        <li>Enter <b>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY</b>
+        <li>Enter
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY</tt></b></ul>
+            or, to limit to a specific device Id,
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
         <li>Click Update Settings
         </ul>
 
-
-        Bugs and patches: <a href="http://github.com/dgryski/ghpbhook">github.com/dgryski/ghpbhook</a>.
+        Bugs and patches: <a href="http://github.com/dgryski/ghpbhook">github.com/dgryski/ghpbhook</a>
 
     </div>
   </body>
