@@ -33,100 +33,102 @@ type pushPayload struct {
 	}
 }
 
+func pbHandler(w http.ResponseWriter, r *http.Request) {
+
+	path := strings.Split(r.URL.Path, "/")
+
+	if len(path) != 3 && len(path) != 4 {
+		http.NotFound(w, r)
+		return
+	}
+
+	hasDeviceId := len(path) == 4
+
+	apikey := path[2]
+	if len(apikey) != 32 {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	var deviceId int
+	if hasDeviceId {
+		var err error
+		deviceId, err = strconv.Atoi(path[3])
+		if err != nil {
+			http.Error(w, "", http.StatusBadRequest)
+			return
+		}
+	}
+
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	payloadJSON := r.PostFormValue("payload")
+	if payloadJSON == "" {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	var payload pushPayload
+	err = json.Unmarshal([]byte(payloadJSON), &payload)
+	if err != nil {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	var o bytes.Buffer
+	err = pushTemplate.Execute(&o, payload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	notification := o.String()
+
+	pb := pushbullet.New(apikey)
+	devices, err := pb.Devices()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		return
+	}
+
+	if len(devices) == 0 {
+		// nothing to do, but do it successfully
+		return
+	}
+
+	success := 0
+	tries := 0
+	for _, device := range devices {
+		// TODO(dgryski): spawn these in parallel?
+		if !hasDeviceId || deviceId == device.Id {
+			err = pb.PushNote(device.Id, "GitHub", notification)
+			tries++
+			if err == nil {
+				success++
+			}
+		}
+	}
+
+	// user sent a device id but there was no match for the devices associated with the key
+	if hasDeviceId && tries == 0 {
+		http.NotFound(w, r)
+		return
+	}
+
+	if success == 0 {
+		// no notifications succeeded :(
+		http.Error(w, "Error sending notification", http.StatusServiceUnavailable)
+	}
+
+	return
+}
+
 func main() {
 
-	http.HandleFunc("/pb/", func(w http.ResponseWriter, r *http.Request) {
-		path := strings.Split(r.URL.Path, "/")
-
-		if len(path) != 3 && len(path) != 4 {
-			http.NotFound(w, r)
-			return
-		}
-
-		hasDeviceId := len(path) == 4
-
-		apikey := path[2]
-		if len(apikey) != 32 {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
-
-		var deviceId int
-		if hasDeviceId {
-			var err error
-			deviceId, err = strconv.Atoi(path[3])
-			if err != nil {
-				http.Error(w, "", http.StatusBadRequest)
-				return
-			}
-		}
-
-		err := r.ParseForm()
-		if err != nil {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
-
-		payloadJSON := r.PostFormValue("payload")
-		if payloadJSON == "" {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
-
-		var payload pushPayload
-		err = json.Unmarshal([]byte(payloadJSON), &payload)
-		if err != nil {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
-
-		var o bytes.Buffer
-		err = pushTemplate.Execute(&o, payload)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		notification := o.String()
-
-		pb := pushbullet.New(apikey)
-		devices, err := pb.Devices()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			return
-		}
-
-		if len(devices) == 0 {
-			// nothing to do, but do it successfully
-			return
-		}
-
-		success := 0
-		tries := 0
-		for _, device := range devices {
-			// TODO(dgryski): spawn these in parallel?
-			if !hasDeviceId || deviceId == device.Id {
-				err = pb.PushNote(device.Id, "GitHub", notification)
-				tries++
-				if err == nil {
-					success++
-				}
-			}
-		}
-
-		// user sent a device id but there was no match for the devices associated with the key
-		if hasDeviceId && tries == 0 {
-			http.NotFound(w, r)
-			return
-		}
-
-		if success == 0 {
-			// no notifications succeeded :(
-			http.Error(w, "Error sending notification", http.StatusServiceUnavailable)
-		}
-
-		return
-	})
-
+	http.HandleFunc("/pb/", pbHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
