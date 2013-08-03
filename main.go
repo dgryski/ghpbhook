@@ -191,15 +191,17 @@ Garen Torikian pushed 3 commits to octokitty/testing
         <ul>
         <li>Install the <a href="https://play.google.com/store/apps/details?id=com.pushbullet.android">PushBullet app</a> on your phone
         <li>Go to the <a href="https://www.pushbullet.com/settings">PushBullet settings page</a> and copy your API key.
-        <li>Next, open your repository on GitHub and go to its Admin page
-        <li>Click Service Hooks
-        <li>Click WebHook URLs
+        <li>Next, open your repository on GitHub and go to its <em>Settings</em> page
+        <li>Click <em>Service Hooks</em>
+        <li>Click <em>WebHook URLs</em>
         <li>Enter
             <ul><li><b><tt>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY</tt></b></ul>
             or, to limit to a specific device Id,
             <ul><li><b><tt>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
-        <li>Click Update Settings
+        <li>Click <em>Update Settings</em>
+        <li>Click <em>Test Hook</em> for instant gratification.
         </ul>
+
 
         Bugs and patches: <a href="http://github.com/dgryski/ghpbhook">github.com/dgryski/ghpbhook</a>
 
