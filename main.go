@@ -33,18 +33,19 @@ type pushPayload struct {
 	}
 }
 
-func pbHandler(w http.ResponseWriter, r *http.Request) {
+func pushHandler(w http.ResponseWriter, r *http.Request) {
 
-	path := strings.Split(r.URL.Path, "/")
+	path := strings.TrimPrefix(r.URL.Path, "/hook/push/")
+	args := strings.Split(path, "/")
 
-	if len(path) != 3 && len(path) != 4 {
-		http.NotFound(w, r)
+	if len(args) != 1 && len(args) != 2 {
+		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	hasDeviceId := len(path) == 4
+	hasDeviceId := len(args) == 2
 
-	apikey := path[2]
+	apikey := args[0]
 	if len(apikey) != 32 {
 		http.Error(w, "", http.StatusBadRequest)
 		return
@@ -53,7 +54,7 @@ func pbHandler(w http.ResponseWriter, r *http.Request) {
 	var deviceId int
 	if hasDeviceId {
 		var err error
-		deviceId, err = strconv.Atoi(path[3])
+		deviceId, err = strconv.Atoi(args[1])
 		if err != nil {
 			http.Error(w, "", http.StatusBadRequest)
 			return
@@ -128,7 +129,7 @@ func pbHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/pb/", pbHandler)
+	http.HandleFunc("/hook/push/", pushHandler)
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
@@ -195,9 +196,9 @@ Garen Torikian pushed 3 commits to octokitty/testing
         <li>Click <em>Service Hooks</em>
         <li>Click <em>WebHook URLs</em>
         <li>Enter
-            <ul><li><b><tt>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY</tt></b></ul>
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/hook/push/YOUR_API_KEY</tt></b></ul>
             or, to limit to a specific device Id,
-            <ul><li><b><tt>http://ghpbhook.herokuapp.com/pb/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/hook/push/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
         <li>Click <em>Update Settings</em>
         <li>Click <em>Test Hook</em> for instant gratification.
         </ul>
