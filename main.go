@@ -82,7 +82,7 @@ func pbHandler(w http.ResponseWriter, r *http.Request) {
 	var o bytes.Buffer
 	err = pushTemplate.Execute(&o, payload)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 	notification := o.String()
@@ -90,7 +90,7 @@ func pbHandler(w http.ResponseWriter, r *http.Request) {
 	pb := pushbullet.New(apikey)
 	devices, err := pb.Devices()
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusServiceUnavailable)
+		http.Error(w, "", http.StatusServiceUnavailable)
 		return
 	}
 
