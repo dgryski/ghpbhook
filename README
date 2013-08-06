@@ -1,7 +1,7 @@
 ghpbhook
 ========
 
-This is a endpoint for github post-receive webhook notifications.  It uses
+This is a endpoint for github and bitbucket post-receive webhook notifications.  It uses
 PushBullet to send a summary of the commits to your Android device.
 
 It is deployed at: https://ghpbhook.herokuapp.com

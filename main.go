@@ -255,6 +255,7 @@ const rootTemplateHTML = `
 
 This is a webhook for <a href="https://help.github.com/articles/post-receive-hooks">GitHub's post-receive</a> notifications.
 It will forward the notification through <a href="http://pushbullet.com">PushBullet</a> to your Android device.
+
 <pre>
 Garen Torikian pushed 3 commits to octokitty/testing
     octokitty c441029 - Test
@@ -267,7 +268,11 @@ Garen Torikian pushed 3 commits to octokitty/testing
         <ul>
         <li>Install the <a href="https://play.google.com/store/apps/details?id=com.pushbullet.android">PushBullet app</a> on your phone
         <li>Go to the <a href="https://www.pushbullet.com/settings">PushBullet settings page</a> and copy your API key.
-        <li>Next, open your repository on GitHub and go to its <em>Settings</em> page
+        </ul>
+
+        <p> For GitHub
+        <ul>
+        <li>Open your repository and go to its <em>Settings</em> page
         <li>Click <em>Service Hooks</em>
         <li>Click <em>WebHook URLs</em>
         <li>Enter
@@ -276,6 +281,18 @@ Garen Torikian pushed 3 commits to octokitty/testing
             <ul><li><b><tt>http://ghpbhook.herokuapp.com/hook/push/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
         <li>Click <em>Update Settings</em>
         <li>Click <em>Test Hook</em> for instant gratification.
+        </ul>
+
+        <p> For BitBucket
+        <ul>
+        <li>Open your repository and go to its <em>Administration</em> page (the gear)
+        <li>Click <em>Hooks</em>
+        <li>Choose <em>POST</em> from the dropdown and click <em>Add Hook</em>
+        <li>Enter
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/bbhook/push/YOUR_API_KEY</tt></b></ul>
+            or, to limit to a specific device Id,
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/bbhook/push/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
+        <li>Click <em>Save</em>
         </ul>
 
 
