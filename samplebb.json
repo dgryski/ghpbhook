@@ -1,0 +1,37 @@
+{
+  "user": "marcus",
+  "repository": {
+    "website": "https://atlassian.com/",
+    "slug": "project-x",
+    "scm": "git",
+    "owner": "marcus",
+    "name": "Project X",
+    "is_private": true,
+    "fork": false,
+    "absolute_url": "/marcus/project-x/"
+  },
+  "commits": [
+    {
+      "utctimestamp": "2012-05-30 03:58:56+00:00",
+      "timestamp": "2012-05-30 05:58:56",
+      "size": -1,
+      "revision": null,
+      "author": "marcus",
+      "branch": "master",
+      "files": [
+        {
+          "type": "modified",
+          "file": "somefile.py"
+        }
+      ],
+      "message": "Added some more things to somefile.py\n",
+      "node": "620ade18607a",
+      "parents": [
+        "702c70160afc"
+      ],
+      "raw_author": "Marcus Bertrand <marcus@somedomain.com>",
+      "raw_node": "620ade18607ac42d872b568bb92acaa9a28620e9"
+    }
+  ],
+  "canon_url": "https://bitbucket.org"
+}

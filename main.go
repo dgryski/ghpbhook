@@ -13,7 +13,16 @@ import (
 	ttmpl "text/template"
 )
 
-type pushPayload struct {
+type notificationMaker interface {
+	who() string
+	payloadToNotification(payloadJSON []byte) (string, int)
+}
+
+type github int
+
+func (gh github) who() string { return "GitHub" }
+
+type ghPushPayload struct {
 	Repository struct {
 		Name  string
 		Owner struct {
@@ -33,10 +42,78 @@ type pushPayload struct {
 	}
 }
 
-func pushHandler(w http.ResponseWriter, r *http.Request) {
+var ghPushTemplate = ttmpl.Must(ttmpl.New("ghpushmsg").Funcs(ttmpl.FuncMap{"trim": trim, "ellipsize": ellipsize}).Parse(ghPushTemplateText))
 
-	path := strings.TrimPrefix(r.URL.Path, "/hook/push/")
-	args := strings.Split(path, "/")
+const ghPushTemplateText = `
+{{ .Pusher.Name }} pushed {{ if len .Commits }}{{ len .Commits}} commits{{ end }} to {{ .Repository.Owner.Name }}/{{ .Repository.Name }}
+{{ range .Commits }}  {{if .Author.Username}}{{.Author.Username}}{{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ ellipsize .Message 60 }}
+{{ end }}
+`
+
+func (gh github) payloadToNotification(payloadJSON []byte) (string, int) {
+
+	var payload ghPushPayload
+	err := json.Unmarshal(payloadJSON, &payload)
+	if err != nil {
+		return "", http.StatusBadRequest
+	}
+
+	var o bytes.Buffer
+	err = ghPushTemplate.Execute(&o, payload)
+	if err != nil {
+		return "", http.StatusInternalServerError
+	}
+
+	return o.String(), http.StatusOK
+}
+
+type bitbucket int
+
+func (bb bitbucket) who() string { return "BitBucket" }
+
+type bbPushPayload struct {
+	User       string
+	Repository struct {
+		Slug  string
+		Owner string
+	}
+	Commits []struct {
+		Author  string
+		Node    string
+		Message string
+	}
+}
+
+var bbPushTemplate = ttmpl.Must(ttmpl.New("bbpushmsg").Funcs(ttmpl.FuncMap{"trim": trim, "ellipsize": ellipsize}).Parse(bbPushTemplateText))
+
+const bbPushTemplateText = `
+{{ .User }} pushed {{ if len .Commits }}{{ len .Commits}} commits{{ end }} to {{ .Repository.Owner }}/{{ .Repository.Slug }}
+{{ range .Commits }}  {{.Author}} {{ trim .Node 7 }} - {{ ellipsize .Message 60 }}
+{{ end }}
+`
+
+func (bb bitbucket) payloadToNotification(payloadJSON []byte) (string, int) {
+
+	var payload bbPushPayload
+	err := json.Unmarshal(payloadJSON, &payload)
+	if err != nil {
+		return "", http.StatusBadRequest
+	}
+
+	var o bytes.Buffer
+	err = bbPushTemplate.Execute(&o, payload)
+	if err != nil {
+		return "", http.StatusInternalServerError
+	}
+
+	return o.String(), http.StatusOK
+}
+
+func pushHandler(w http.ResponseWriter, r *http.Request, nm notificationMaker) {
+
+	args := strings.Split(r.URL.Path, "/")
+	// strip "/ghhook/push/" entries
+	args = args[3:]
 
 	if len(args) != 1 && len(args) != 2 {
 		http.Error(w, "", http.StatusBadRequest)
@@ -73,20 +150,12 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var payload pushPayload
-	err = json.Unmarshal([]byte(payloadJSON), &payload)
-	if err != nil {
-		http.Error(w, "", http.StatusBadRequest)
-		return
-	}
+	notification, httpStatus := nm.payloadToNotification([]byte(payloadJSON))
 
-	var o bytes.Buffer
-	err = pushTemplate.Execute(&o, payload)
-	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
+	if httpStatus != http.StatusOK {
+		http.Error(w, "", httpStatus)
 		return
 	}
-	notification := o.String()
 
 	pb := pushbullet.New(apikey)
 	devices, err := pb.Devices()
@@ -105,7 +174,7 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 	for _, device := range devices {
 		// TODO(dgryski): spawn these in parallel?
 		if !hasDeviceId || deviceId == device.Id {
-			err = pb.PushNote(device.Id, "GitHub", notification)
+			err = pb.PushNote(device.Id, nm.who(), notification)
 			tries++
 			if err == nil {
 				success++
@@ -129,7 +198,13 @@ func pushHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 
-	http.HandleFunc("/hook/push/", pushHandler)
+	// old
+	http.HandleFunc("/hook/push/", func(w http.ResponseWriter, r *http.Request) { pushHandler(w, r, github(0)) })
+
+	// new
+	http.HandleFunc("/ghhook/push/", func(w http.ResponseWriter, r *http.Request) { pushHandler(w, r, github(0)) })
+	http.HandleFunc("/bbhook/push/", func(w http.ResponseWriter, r *http.Request) { pushHandler(w, r, bitbucket(0)) })
+
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/" {
 			http.NotFound(w, r)
@@ -226,11 +301,3 @@ func ellipsize(s string, n int) string {
 	}
 	return s
 }
-
-var pushTemplate = ttmpl.Must(ttmpl.New("pushmsg").Funcs(ttmpl.FuncMap{"trim": trim, "ellipsize": ellipsize}).Parse(pushTemplateText))
-
-const pushTemplateText = `
-{{ .Pusher.Name }} pushed {{ if len .Commits }}{{ len .Commits}} commits{{ end }} to {{ .Repository.Owner.Name }}/{{ .Repository.Name }}
-{{ range .Commits }}  {{if .Author.Username}}{{.Author.Username}}{{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ ellipsize .Message 60 }}
-{{ end }}
-`
