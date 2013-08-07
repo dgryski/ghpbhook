@@ -6,5 +6,10 @@ PushBullet to send a summary of the commits to your Android device.
 
 It is deployed at: https://ghpbhook.herokuapp.com
 
+For testing, use:
+
+curl -vv --data-urlencode 'payload@samplebb.json' http://localhost:8080/bbhook/push/$API_KEY
+curl -vv --data-urlencode 'payload@sample.json' http://localhost:8080/ghhook/push/$API_KEY
+
 Copyright (c) 2013 Damian Gryski <damian@gryski.com>
 This code is licensed under the Apache License, version 2.0
