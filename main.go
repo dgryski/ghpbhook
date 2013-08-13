@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/xconstruct/go-pushbullet"
-	htmpl "html/template"
 	"log"
 	"net/http"
 	"os"
@@ -211,7 +210,7 @@ func main() {
 			return
 		}
 
-		rootTemplate.Execute(w, nil)
+		w.Write([]byte(rootTemplateHTML))
 	})
 
 	port := ":8080"
@@ -224,8 +223,6 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(port, nil))
 }
-
-var rootTemplate = htmpl.Must(htmpl.New("root").Parse(rootTemplateHTML))
 
 const rootTemplateHTML = `
 <html>
