@@ -309,6 +309,14 @@ func trim(s string, n int) string {
 }
 func ellipsize(s string, n int) string {
 	l := len(s)
+
+	newline := strings.IndexRune(s, rune('\n'))
+	// the first line is shorter than our required length, so just use that
+	if newline > 0 && newline < n {
+		return s[:newline]
+	}
+
+	// first line is longer, so trim the line and add an ellipsis
 	if l > n {
 		l = n
 		return s[:n-5] + "(...)"
