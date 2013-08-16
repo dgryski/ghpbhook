@@ -210,7 +210,7 @@ func main() {
 			return
 		}
 
-		w.Write([]byte(rootTemplateHTML))
+		w.Write(rootTemplate)
 	})
 
 	port := ":8080"
@@ -223,6 +223,8 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(port, nil))
 }
+
+var rootTemplate = []byte(rootTemplateHTML)
 
 const rootTemplateHTML = `
 <html>
