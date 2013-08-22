@@ -197,10 +197,6 @@ func pushHandler(w http.ResponseWriter, r *http.Request, nm notificationMaker) {
 
 func main() {
 
-	// old
-	http.HandleFunc("/hook/push/", func(w http.ResponseWriter, r *http.Request) { pushHandler(w, r, github(0)) })
-
-	// new
 	http.HandleFunc("/ghhook/push/", func(w http.ResponseWriter, r *http.Request) { pushHandler(w, r, github(0)) })
 	http.HandleFunc("/bbhook/push/", func(w http.ResponseWriter, r *http.Request) { pushHandler(w, r, bitbucket(0)) })
 
