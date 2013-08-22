@@ -271,9 +271,9 @@ Garen Torikian pushed 3 commits to octokitty/testing
         <li>Click <em>Service Hooks</em>
         <li>Click <em>WebHook URLs</em>
         <li>Enter
-            <ul><li><b><tt>http://ghpbhook.herokuapp.com/hook/push/YOUR_API_KEY</tt></b></ul>
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/ghhook/push/YOUR_API_KEY</tt></b></ul>
             or, to limit to a specific device Id,
-            <ul><li><b><tt>http://ghpbhook.herokuapp.com/hook/push/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
+            <ul><li><b><tt>http://ghpbhook.herokuapp.com/ghhook/push/YOUR_API_KEY/DEVICE_ID</tt></b></ul>
         <li>Click <em>Update Settings</em>
         <li>Click <em>Test Hook</em> for instant gratification.
         </ul>
