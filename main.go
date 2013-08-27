@@ -44,7 +44,7 @@ type ghPushPayload struct {
 var ghPushTemplate = ttmpl.Must(ttmpl.New("ghpushmsg").Funcs(ttmpl.FuncMap{"trim": trim, "ellipsize": ellipsize}).Parse(ghPushTemplateText))
 
 const ghPushTemplateText = `
-{{ .Pusher.Name }} pushed {{ if len .Commits }}{{ len .Commits}} commits{{ end }} to {{ .Repository.Owner.Name }}/{{ .Repository.Name }}
+{{ .Pusher.Name }} pushed {{ len .Commits }} commits to {{ .Repository.Owner.Name }}/{{ .Repository.Name }}
 {{ range .Commits }}  {{if .Author.Username}}{{.Author.Username}}{{else}}{{.Author.Name}}{{end}} {{ trim .Id 7 }} - {{ ellipsize .Message 60 }}
 {{ end }}
 `
@@ -86,7 +86,7 @@ type bbPushPayload struct {
 var bbPushTemplate = ttmpl.Must(ttmpl.New("bbpushmsg").Funcs(ttmpl.FuncMap{"trim": trim, "ellipsize": ellipsize}).Parse(bbPushTemplateText))
 
 const bbPushTemplateText = `
-{{ .User }} pushed {{ if len .Commits }}{{ len .Commits}} commits{{ end }} to {{ .Repository.Owner }}/{{ .Repository.Slug }}
+{{ .User }} pushed {{ len .Commits }} commits to {{ .Repository.Owner }}/{{ .Repository.Slug }}
 {{ range .Commits }}  {{.Author}} {{ trim .Node 7 }} - {{ ellipsize .Message 60 }}
 {{ end }}
 `
