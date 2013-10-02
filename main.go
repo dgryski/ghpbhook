@@ -54,12 +54,14 @@ func (gh github) payloadToNotification(payloadJSON []byte) (string, int) {
 	var payload ghPushPayload
 	err := json.Unmarshal(payloadJSON, &payload)
 	if err != nil {
+		log.Println("json.Unmarshal:", err)
 		return "", http.StatusBadRequest
 	}
 
 	var o bytes.Buffer
 	err = ghPushTemplate.Execute(&o, payload)
 	if err != nil {
+		log.Println("ghPushTemplate.Execute:", err)
 		return "", http.StatusInternalServerError
 	}
 
@@ -96,12 +98,14 @@ func (bb bitbucket) payloadToNotification(payloadJSON []byte) (string, int) {
 	var payload bbPushPayload
 	err := json.Unmarshal(payloadJSON, &payload)
 	if err != nil {
+		log.Println("json.Unmarshal:", err)
 		return "", http.StatusBadRequest
 	}
 
 	var o bytes.Buffer
 	err = bbPushTemplate.Execute(&o, payload)
 	if err != nil {
+		log.Println("bbPushTemplate.Execute:", err)
 		return "", http.StatusInternalServerError
 	}
 
