@@ -163,6 +163,7 @@ func pushHandler(w http.ResponseWriter, r *http.Request, nm notificationMaker) {
 	pb := pushbullet.New(apikey)
 	devices, err := pb.Devices()
 	if err != nil {
+		log.Println("Error fetching devices: ", err)
 		http.Error(w, "", http.StatusServiceUnavailable)
 		return
 	}
@@ -181,6 +182,8 @@ func pushHandler(w http.ResponseWriter, r *http.Request, nm notificationMaker) {
 			tries++
 			if err == nil {
 				success++
+			} else {
+				log.Println("Error pushing notification:", err)
 			}
 		}
 	}
