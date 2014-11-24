@@ -3,13 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/xconstruct/go-pushbullet"
 	"log"
 	"net/http"
 	"os"
-	"strconv"
 	"strings"
 	ttmpl "text/template"
+
+	"github.com/xconstruct/go-pushbullet"
 )
 
 type notificationMaker interface {
@@ -131,14 +131,9 @@ func pushHandler(w http.ResponseWriter, r *http.Request, nm notificationMaker) {
 		return
 	}
 
-	var deviceId int
+	var deviceId string
 	if hasDeviceId {
-		var err error
-		deviceId, err = strconv.Atoi(args[1])
-		if err != nil {
-			http.Error(w, "", http.StatusBadRequest)
-			return
-		}
+		deviceId = args[1]
 	}
 
 	err := r.ParseForm()
@@ -177,13 +172,13 @@ func pushHandler(w http.ResponseWriter, r *http.Request, nm notificationMaker) {
 	tries := 0
 	for _, device := range devices {
 		// TODO(dgryski): spawn these in parallel?
-		if !hasDeviceId || deviceId == device.Id {
-			err = pb.PushNote(device.Id, nm.who(), notification)
+		if !hasDeviceId || deviceId == device.Iden {
+			err = pb.PushNote(device.Iden, nm.who(), notification)
 			tries++
 			if err == nil {
 				success++
 			} else {
-				log.Println("Error pushing notification:", err)
+				log.Println("Error pushing notification:", err, device.Iden, nm.who(), notification)
 			}
 		}
 	}
