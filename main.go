@@ -264,7 +264,7 @@ Garen Torikian pushed 3 commits to octokitty/testing
 
         <ul>
         <li>Install the <a href="https://play.google.com/store/apps/details?id=com.pushbullet.android">PushBullet app</a> on your phone
-        <li>Go to the <a href="https://www.pushbullet.com/settings">PushBullet settings page</a> and copy your API key.
+        <li>Go to the <a href="https://www.pushbullet.com/account">PushBullet account settings page</a> and copy your API key.
         </ul>
 
         <p> For GitHub
